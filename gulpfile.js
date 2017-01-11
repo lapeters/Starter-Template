@@ -1,5 +1,5 @@
 var gulp = require('gulp');
-var sass = require('gulp-ruby-sass');
+var sass = require('gulp-sass');
 var browserSync = require('browser-sync');
 var concat = require('gulp-concat');
 var uglify = require('gulp-uglify');
@@ -22,11 +22,11 @@ gulp.task('browser-sync', ['sass'], function() {
 
 // Compiles files from _scss into dist folder and app. Also reloads Browser Sync.
 gulp.task('sass', function(){
-	return gulp.src('app/css/main.scss', {style: 'compressed'})
-		.pipe(rename({suffix: '.min'}))
-		.pipe(gulp.dest('dist/css'))
+	return gulp.src('app/assets/css/main.scss')
+		.pipe(sass())
+		.pipe(gulp.dest('dist/assets/css'))
 		.pipe(browserSync.reload({stream:true}))
-		.pipe(gulp.dest('app/css'));
+		.pipe(gulp.dest('app/assets/css'))
 });
 
 // Transfer index.html to dist folder
@@ -37,10 +37,10 @@ gulp.task('html', function() {
 
 // The Watchers
 gulp.task('watch', function(){
-	gulp.watch('app/css/**', ['sass']);
+	gulp.watch('app/assets/css/**', ['sass']);
 	gulp.watch('app/*.html', browserSync.reload);
-	gulp.watch('app/js/**', browserSync.reload);
-	gulp.watch('app/img/**', browserSync.reload);
+	gulp.watch('app/assets/js/**', browserSync.reload);
+	gulp.watch('app/assets/img/**', browserSync.reload);
 });
 
 
@@ -49,11 +49,11 @@ gulp.task('watch', function(){
 
 // Concatinate and minify JavaScript
 gulp.task('scripts', function() {
-	return gulp.src('app/js/*.js')
+	return gulp.src('app/assets/js/*.js')
 		.pipe(concat('main.js'))
 			.pipe(rename({suffix: '.min'}))
 			.pipe(uglify())
-		.pipe(gulp.dest('dist/js'));
+		.pipe(gulp.dest('dist/assets/js'));
 });
 
 // Optimizing Images
@@ -64,7 +64,7 @@ gulp.task('images', function() {
 			progressive: true,
 			interlaced: true
 		})))
-		.pipe(gulp.dest('dist/img'));
+		.pipe(gulp.dest('dist/assets/img'));
 });
 
 
