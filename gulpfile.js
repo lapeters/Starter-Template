@@ -1,18 +1,21 @@
-var gulp = require('gulp');
-var sass = require('gulp-sass');
-var browserSync = require('browser-sync');
-var concat = require('gulp-concat');
-var uglify = require('gulp-uglify');
-var rename = require('gulp-rename');
-var imagemin = require('gulp-imagemin');
-var cache = require('gulp-cache');
+var gulp = require('gulp'),
+	sass = require('gulp-ruby-sass'),
+	browserSync = require('browser-sync'),
+	autoprefixer = require('gulp-autoprefixer'),
+	cssnano = require('gulp-cssnano'),
+	concat = require('gulp-concat'),
+	uglify = require('gulp-uglify'),
+	rename = require('gulp-rename'),
+	imagemin = require('gulp-imagemin'),
+	cache = require('gulp-cache'),
+	del = require('del');
 
 
 // Development Tasks
 // -----------------
 
 // Browser Sync server
-gulp.task('browser-sync', ['sass'], function() {
+gulp.task('browser-sync', ['styles'], function() {
 	browserSync({
 		server: {
 			baseDir: 'app'
@@ -21,11 +24,14 @@ gulp.task('browser-sync', ['sass'], function() {
 });
 
 // Compiles files from _scss into dist folder and app. Also reloads Browser Sync.
-gulp.task('sass', function(){
-	return gulp.src('app/assets/css/main.scss')
-		.pipe(sass())
+gulp.task('styles', function(){
+	return sass('app/assets/css/main.scss', { style: 'expanded' })
+		.pipe(autoprefixer('last 2 version'))
 		.pipe(gulp.dest('dist/assets/css'))
+		.pipe(rename({suffix: '.min'}))
+		.pipe(cssnano())
 		.pipe(browserSync.reload({stream:true}))
+		.pipe(gulp.dest('dist/assets/css'))
 		.pipe(gulp.dest('app/assets/css'))
 });
 
@@ -37,7 +43,7 @@ gulp.task('html', function() {
 
 // The Watchers
 gulp.task('watch', function(){
-	gulp.watch('app/assets/css/**', ['sass']);
+	gulp.watch('app/assets/css/**', ['styles']);
 	gulp.watch('app/*.html', browserSync.reload);
 	gulp.watch('app/assets/js/**', browserSync.reload);
 	gulp.watch('app/assets/img/**', browserSync.reload);
@@ -51,8 +57,8 @@ gulp.task('watch', function(){
 gulp.task('scripts', function() {
 	return gulp.src('app/assets/js/*.js')
 		.pipe(concat('main.js'))
-			.pipe(rename({suffix: '.min'}))
-			.pipe(uglify())
+		.pipe(rename({suffix: '.min'}))
+		.pipe(uglify())
 		.pipe(gulp.dest('dist/assets/js'));
 });
 
@@ -67,10 +73,16 @@ gulp.task('images', function() {
 		.pipe(gulp.dest('dist/assets/img'));
 });
 
+gulp.task('clean', function(){
+	return del(['dist/assets/css', 'dist/assets/js', 'dist/assets/img']);
+});
+
 
 // Build Sequence
 // --------------
 
-gulp.task('build', ['html', 'sass', 'scripts', 'images'])
+gulp.task('build', ['clean'], function(){
+	gulp.start('styles', 'scripts', 'html', 'images');
+});
 
 gulp.task('default', ['browser-sync', 'watch']);
