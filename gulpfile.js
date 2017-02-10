@@ -56,7 +56,7 @@ gulp.task('watch', function(){
 // Concatinate and minify JavaScript
 gulp.task('scripts', function() {
 	return gulp.src('app/assets/js/*.js')
-		.pipe(concat('main.js'))
+		.pipe(concat('functions.js'))
 		.pipe(rename({suffix: '.min'}))
 		.pipe(uglify())
 		.pipe(gulp.dest('dist/assets/js'));
@@ -64,9 +64,9 @@ gulp.task('scripts', function() {
 
 // Optimizing Images
 gulp.task('images', function() {
-	return gulp.src('app/img/**/*.+(png|jpg|jpeg|gif|svg')
+	return gulp.src('app/img/**/*')
 		.pipe(cache(imagemin({
-			optimizationLevel: 5,
+			optimizationLevel: 7,
 			progressive: true,
 			interlaced: true
 		})))
